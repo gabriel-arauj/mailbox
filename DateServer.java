@@ -5,44 +5,64 @@
  
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
+
+class Mensagem
+{
+	String remetenteID;
+	String destinatarioID;
+	String mensagem;
+	public Mensagem(String remetenteID, String destinatarioID, String mensagem){
+		this.remetenteID = remetenteID;
+		this.destinatarioID = destinatarioID;
+		this.mensagem = mensagem;
+	}
+	String getMensagem(){
+		return this.mensagem;
+	}
+
+	String getDestinatarioID(){
+		return this.destinatarioID;
+	}
+
+	String getRemetenteID(){
+		return this.remetenteID;
+	}
+}
 
 public class DateServer
 {
-	public static String operacao(String in){
+	public static String mailbox(String in){
 		String[] dado;
-		String operador;
-		double operando1;
-		double operando2;
+		String remetenteID;
+		String destinatarioID;
+		String mensagem;
+		ArrayList<Mensagem> caixaEntrada = new ArrayList<Mensagem>();
+
 		try{
 			dado = in.split(":");
-			operador = dado[0];
-			operando1 = Double.parseDouble(dado[1]);
-			operando2 = Double.parseDouble(dado[2]);
+			if (dado[0].equals("enviar")) {
+				remetenteID = dado[1];
+				destinatarioID = dado[2];
+				mensagem = dado[3];
+				Mensagem novaMensagem = new Mensagem(remetenteID, destinatarioID, mensagem);
+				caixaEntrada.add(novaMensagem);
+			}else if (dado[0].equals("receber")) {
+				remetenteID = dado[1];
+				for (Mensagem i : caixaEntrada) {
+					if(i.getRemetenteID() == remetenteID){
+						mensagem = i.getMensagem();
+						return mensagem;
+					}
+				}
+				return "Sem mensagem";
+			}else{
+				return null;
+			}
 		}catch(Exception e){
 			return null;
 		}
-
-
-		double resp = 0;
-		switch (operador) {
-			case "+":
-			resp = operando1 + operando2;
-			break;
-			case "-":
-			resp = operando1 - operando2;
-			break;
-			case "*":
-			resp = operando1 * operando2;
-			break;
-			case "/":
-			if(operando2 != 0)
-				resp = operando1 / operando2;
-			break;
-			default:
-				resp = 0;
-		}
-
-		return String.format("%.2f "+ operador + " %.2f = %.2f", operando1, operando2, resp);
+		return null;
 	}
 	public static void main(String[] args) throws IOException {
 		InputStream in = null;
@@ -67,7 +87,7 @@ public class DateServer
 
 				line = bin.readLine();
 				System.out.println("Mensagem recebida: " + line);
-				String resp = operacao(line);
+				String resp = mailbox(line);
 				if (resp == null) {
 					pout.println("ERRO de parâmetros");
 				}else{
