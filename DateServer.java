@@ -32,12 +32,14 @@ class Mensagem
 
 public class DateServer
 {
+	public static ArrayList<Mensagem> caixaEntrada = new ArrayList<Mensagem>();
+
 	public static String mailbox(String in){
 		String[] dado;
 		String remetenteID;
 		String destinatarioID;
-		String mensagem;
-		ArrayList<Mensagem> caixaEntrada = new ArrayList<Mensagem>();
+		String mensagem = "";
+		
 
 		try{
 			dado = in.split(":");
@@ -47,52 +49,47 @@ public class DateServer
 				mensagem = dado[3];
 				Mensagem novaMensagem = new Mensagem(remetenteID, destinatarioID, mensagem);
 				caixaEntrada.add(novaMensagem);
+				return "mensagem recebida";
 			}else if (dado[0].equals("receber")) {
-				remetenteID = dado[1];
+				destinatarioID = dado[1];
 				for (Mensagem i : caixaEntrada) {
-					if(i.getRemetenteID() == remetenteID){
-						mensagem = i.getMensagem();
-						return mensagem;
+					if(i.getDestinatarioID().equals(destinatarioID)){
+						mensagem += "\n" +  "remetente " + i.getRemetenteID() +": "+i.getMensagem();
 					}
 				}
-				return "Sem mensagem";
+				if(mensagem != ""){
+					return "Todas as mensagens para o destinatario "+ destinatarioID + ":" + mensagem;
+				}else{
+					return "Sem mensagens";
+				}
 			}else{
-				return null;
+				return "ERRO de parâmetros";
 			}
 		}catch(Exception e){
-			return null;
+			return "ERRO de parâmetros";
 		}
-		return null;
 	}
 	public static void main(String[] args) throws IOException {
 		InputStream in = null;
 		BufferedReader bin = null;
 		Socket client = null;
 		ServerSocket sock = null;
-
+		PrintWriter pout  = null;
+		String line = null;
+		String resp = null;
 		try {
 			sock = new ServerSocket(6013);
-			// now listen for connections
 			while (true) {
 				client = sock.accept();
-				System.out.println("server = " + sock);
-				System.out.println("client = " + client);
-
-				//preparar para receber a mensagem
 				in = client.getInputStream();
 				bin = new BufferedReader(new InputStreamReader(in));
-				// we have a connection
-				PrintWriter pout = new PrintWriter(client.getOutputStream(), true);
-				String line;
-
 				line = bin.readLine();
-				System.out.println("Mensagem recebida: " + line);
-				String resp = mailbox(line);
-				if (resp == null) {
-					pout.println("ERRO de parâmetros");
-				}else{
-					pout.println(resp);	
-				}
+				System.out.println(line);
+
+				resp = mailbox(line);
+
+				pout = new PrintWriter(client.getOutputStream(), true);
+				pout.println(resp);	
 				pout.close();
 				client.close();			
 			}
