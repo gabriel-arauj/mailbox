@@ -7,3 +7,13 @@ nesse exemplo a mensagem "olá mundo" está sendo enviada do remetente 1 para o 
 Para receber todas as mensagens de sua mailbox utilizar o seguinte padrão: "receber:destinatŕario", exemplo: "receber:2", nesse 
 exemplo o destinatário 2 vai receber todas as mensagens que foram enviadas para ele.
 a mailbox guarda todas as mensagens em um ArrayList, e retorna todas, sem apagar nenhuma. 
+
+Instruções: 
+para iniciar o servidor
+java DateServer
+
+para enviar uma mensagem
+java DateCliente "enviar:1:2:olá mundo"
+
+para ver as mensagens
+java DateCliente "receber:2"
